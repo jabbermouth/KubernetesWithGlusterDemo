@@ -1,0 +1,16 @@
+﻿@model IEnumerable<KeyValuePair<string, string>>
+@{
+    ViewData["Title"] = "Diagnostic Info";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Diagnostic Info</h1>
+        <a asp-action="RemoveFile">Remove cache file</a>
+
+        @foreach (var pair in Model)
+        {
+            <p>
+                <b>@pair.Key</b>: @pair.Value
+            </p>
+        }
+</div>

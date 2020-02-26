@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+ name: kubernetes-demo-shared
+ annotations:
+   volume.beta.kubernetes.io/storage-class: gluster-heketi
+spec:
+ accessModes:
+  - ReadWriteMany
+ resources:
+   requests:
+     storage: 1Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: kubernetes-demo
+  name: kubernetes-demo
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: kubernetes-demo
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+  labels:
+    run: kubernetes-demo
+  name: kubernetes-demo
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      run: kubernetes-demo
+  template:
+    metadata:
+      labels:
+        run: kubernetes-demo
+    spec:
+      containers:
+      - image: jabbermouth/kuberneteswithglusterdemo:latest
+        imagePullPolicy: Always
+        name: kubernetes-demo
+        volumeMounts:
+          - mountPath: /shared
+            name: shared-data
+      volumes:
+        - name: shared-data
+          persistentVolumeClaim:
+            claimName: kubernetes-demo-shared
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: kubernetes-demo
+  annotations:
+spec:
+  tls:
+  - hosts:
+    - kubernetes-cluster-01.cabi.org
+    secretName: cabi-dot-org
+  rules:
+  - host: kubernetes-cluster-01.cabi.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: kubernetes-demo
+          servicePort: 80
