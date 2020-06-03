@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 
 namespace KubernetesWithGlusterDemo.Web
@@ -24,6 +26,7 @@ namespace KubernetesWithGlusterDemo.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddHealthChecks().AddCheck("File Check", () => { return File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "healthok.txt")) ? HealthCheckResult.Healthy() : HealthCheckResult.Unhealthy(); });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,7 +54,8 @@ namespace KubernetesWithGlusterDemo.Web
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-            });   
+                endpoints.MapHealthChecks("/health");
+            });
         }
     }
 }

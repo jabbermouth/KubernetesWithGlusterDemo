@@ -78,7 +78,7 @@ spec:
   - host: kubernetes-cluster-01.cabi.org
     http:
       paths:
-      - path: /
+      - path: /demo
         backend:
           serviceName: kubernetes-demo
           servicePort: 80

@@ -51,7 +51,19 @@ namespace KubernetesWithGlusterDemo.Web.Controllers
             return RedirectToAction("Index");
         }
 
-            private IEnumerable<KeyValuePair<string, string>> FetchStats()
+        [Route("makeunhealthy")]
+        public IActionResult MakeUnhealthy()
+        {
+            string healthOkFile = Path.Combine(Directory.GetCurrentDirectory(), "healthok.txt");
+            if (System.IO.File.Exists(healthOkFile))
+            {
+                System.IO.File.Delete(healthOkFile);
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        private IEnumerable<KeyValuePair<string, string>> FetchStats()
         {
             var dataToWrite = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             try
